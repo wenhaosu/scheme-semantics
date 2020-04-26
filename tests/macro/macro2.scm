@@ -3,3 +3,4 @@
     ((_ (X)...) (list X ...))))
 
 (display (test (1) (2) (3)))
+  (newline)

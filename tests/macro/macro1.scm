@@ -3,3 +3,4 @@
     ((_ X Y Z) (list X Y Z))))
 
 (display (test 1 2 3))
+  (newline)
