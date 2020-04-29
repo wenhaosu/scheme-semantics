@@ -12,7 +12,7 @@ module SCHEME-COMMON
 
 // Builtin function names, maybe consider replacing with arith later
   syntax Name ::= "+" | "-" | "*" | "/"
-  syntax Names ::= List{Name,","}
+                | "display" | "newline"
 
 // Basic Scheme expressions, using [] now to aviod K's parsing issue
   syntax Exp ::= Int | Bool | String | Name
@@ -87,8 +87,19 @@ displays the result of last function executed. */
   rule [- I .Vals] => I                                     [arith]
   rule [* I1 I2 Vals] => [* (I1 *Int I2) Vals]              [arith]
   rule [* I .Vals] => I                                     [arith]
-  rule [/ I1 I2 Vals] => [/ (I1 /Int I2) Vals]              [arith]
-    when I2 =/=K 0
+  rule [/ I1 I2 Vals] => [/ (I1 /Int I2) Vals]
+    when I2 =/=K 0                                          [arith]
   rule [/ I .Vals] => I                                     [arith]
+
+  //@ \subsection{I/O}
+
+// Currently having bug on display, seeking a way to complete the 
+// procecss of V ~> K
+
+  rule <k> [newline .Exps] => "" ...</k>
+       <output>... .List => ListItem("\n") </output>        [io]
+
+  rule <k> [display V:Val] => "" ...</k>
+       <output>... .List => ListItem(V) </output>           [io]
 
 endmodule
