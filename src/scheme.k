@@ -14,6 +14,8 @@ module SCHEME-COMMON
   syntax Name ::= "+" | "-" | "*" | "/"
                 | "display" | "newline"
 
+  syntax Names ::= List{Name," "}
+
 // Basic Scheme expressions, using [] now to aviod K's parsing issue
   syntax Exp ::= Int | Bool | String | Name
                | "[" Name Exps "]"                 [strict(2)]
@@ -23,6 +25,10 @@ module SCHEME-COMMON
   syntax Vals ::= List{Val," "}
   syntax Bottom
   syntax Bottoms ::= List{Bottom," "}
+
+// Define program to be a sequence of expressions followed by eof
+  syntax Pgm ::= Exp Pgm            [strict(1)] 
+               | "eof"
 
 endmodule
 
@@ -57,7 +63,7 @@ module SCHEME
 //*@ \subsection{Configuration} */
 
   configuration <T color="yellow">
-                  <k color="green"> $PGM:Exps </k>
+                  <k color="green"> $PGM:Pgm </k>
                   <env color="violet"> .Map </env>
                   <store color="white"> .Map </store>
                   <input color="magenta" stream="stdin"> .List </input>
@@ -70,14 +76,20 @@ module SCHEME
   syntax Exp ::= Val
   syntax Exps ::= Vals
   syntax Vals ::= Bottoms
-  syntax KResult ::= Val
+  syntax Exps ::= Names
+  syntax Names ::= Bottoms
+  syntax KResult ::= Vals | Val
 
 /*@ To make sure that the program executes sequentially and KResult
 displays the result of last function executed. */
 
-  rule _:Val E:Exps => E
-    requires notBool(E ==K .Exps)
-  rule V:Val .Exps => V
+  // rule _:Val E:Exps => E
+  //   requires notBool(E ==K .Exps)
+  // rule V:Val .Exps => V
+
+  rule _:Val P:Pgm => P
+    when notBool(P ==K eof)
+  rule V:Val eof => V
 
 //@ \subsection{Arithmetic expressions}
 
