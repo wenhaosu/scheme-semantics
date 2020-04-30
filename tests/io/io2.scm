@@ -1,0 +1,3 @@
+[display [read]]
+  [newline]
+eof

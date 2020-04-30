@@ -12,7 +12,7 @@ module SCHEME-COMMON
 
 // Builtin function names, maybe consider replacing with arith later
   syntax Name ::= "+" | "-" | "*" | "/"
-                | "display" | "newline"
+                | "display" | "newline" | "read"
 
   syntax Names ::= List{Name," "}
 
@@ -83,10 +83,6 @@ module SCHEME
 /*@ To make sure that the program executes sequentially and KResult
 displays the result of last function executed. */
 
-  // rule _:Val E:Exps => E
-  //   requires notBool(E ==K .Exps)
-  // rule V:Val .Exps => V
-
   rule _:Val P:Pgm => P
     when notBool(P ==K eof)
   rule V:Val eof => V
@@ -108,10 +104,13 @@ displays the result of last function executed. */
 // Currently having bug on display, seeking a way to complete the 
 // procecss of V ~> K
 
-  rule <k> [newline .Exps] => "" ...</k>
+  rule <k> [newline .Exps] => "\n" ...</k>
        <output>... .List => ListItem("\n") </output>        [io]
 
-  rule <k> [display V:Val] => "" ...</k>
+  rule <k> [display V:Val] => V ...</k>
        <output>... .List => ListItem(V) </output>           [io]
+
+  rule <k> [read .Exps] => I ...</k>
+       <input> ListItem(I:Int) => .List ... </input>        [io]
 
 endmodule
