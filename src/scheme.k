@@ -12,7 +12,9 @@ module SCHEME-COMMON
 
 // Builtin function names, maybe consider replacing with arith later
   syntax Name ::= "+" | "-" | "*" | "/"
+                | ">" | "<" | ">=" | "<=" | "not"
                 | "display" | "newline" | "read"
+                | "eqv?" | "boolean?" | "integer?" | "string?"
 
   syntax Names ::= List{Name," "}
 
@@ -99,10 +101,24 @@ displays the result of last function executed. */
     when I2 =/=K 0                                          [arith]
   rule [/ I .Vals] => I                                     [arith]
 
-  //@ \subsection{I/O}
+//@ \subsection{Boolean expressions}
+  rule [> I1 I2] => I1 >Int I2                              [arith]
+  rule [>= I1 I2] => I1 >=Int I2                            [arith]
+  rule [< I1 I2] => I1 <Int I2                              [arith]
+  rule [<= I1 I2] => I1 <=Int I2                            [arith]
+  rule [not false] => true                                  [arith]
+  rule [not _:Val] => false                                 [arith]
+  rule [boolean? B:Bool] => true                            [arith]
+  rule [boolean? _] => false                                [arith]
+  rule [string? S:String] => true                           [arith]
+  rule [string? _] => false                                 [arith]
+  rule [integer? I:Int] => true                             [arith]
+  rule [integer? _] => false                                [arith]
+  rule [eqv? V1:Val V2:Val] => true
+    when V1 ==K V2                                          [arith]
+  rule [eqv? _:Val _:Val] => false                          [arith]
 
-// Currently having bug on display, seeking a way to complete the 
-// procecss of V ~> K
+  //@ \subsection{I/O}
 
   rule <k> [newline .Exps] => "\n" ...</k>
        <output>... .List => ListItem("\n") </output>        [io]
