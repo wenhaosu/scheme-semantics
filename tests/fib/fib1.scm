@@ -1,5 +1,5 @@
-;;;this is a function which generates the fibonacci numbers
-;;;using a do loop
+//this is a function which generates the fibonacci numbers
+//using a do loop
 [define fib
   [lambda[n]
     [if [= n 0]

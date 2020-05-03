@@ -1,4 +1,4 @@
-;;; This shows the non-deterministic copying/sharing of quote
+// This shows the non-deterministic copying/sharing of quote
 [define foo [lambda[] '[1 2 3]]]
 [define x [foo]]
 [set-car! x 4]
@@ -8,6 +8,6 @@
 [define y [foo]]
 [display y]
 
-;;; SEARCH keyword tells Maude to search for multiple outputs do to 
-;;; non-determinism
+// SEARCH keyword tells Maude to search for multiple outputs do to 
+// non-determinism
 SEARCHeof

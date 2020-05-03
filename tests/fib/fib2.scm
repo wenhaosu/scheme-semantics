@@ -1,5 +1,5 @@
-;;;this is a function which generates the fibonacci numbers
-;;;using recursion
+//this is a function which generates the fibonacci numbers
+//using recursion
 [define [fib n]
   [if [or [= 1 n] [= 2 n]]
       1

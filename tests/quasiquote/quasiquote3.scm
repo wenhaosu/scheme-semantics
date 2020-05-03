@@ -1,4 +1,4 @@
-;;;This is an example from R5RS
+//This is an example from R5RS
 [display
   [let [[name1 'x]
         [name2 'y]]

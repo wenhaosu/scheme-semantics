@@ -1,5 +1,5 @@
-;;;tail recursive factorial...note that currently the definition does
-;;;not have "tail call optimization"
+//tail recursive factorial...note that currently the definition does
+//not have "tail call optimization"
 [define [fac n]
    [letrec [[aux 
       [lambda [n acc]

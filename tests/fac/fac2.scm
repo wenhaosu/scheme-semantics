@@ -1,4 +1,4 @@
-;;;factorial with recursion
+//factorial with recursion
 [define [fac n]
    [if [= n 1]
         1
