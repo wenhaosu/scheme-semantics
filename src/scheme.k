@@ -16,17 +16,18 @@ module SCHEME-COMMON
                 | "display" | "newline" | "read"
                 | "eqv?" | "boolean?" | "integer?" | "string?"
 
-  syntax Names ::= List{Name," "}
+  syntax Names ::= List{Name," "}                  [klabel(exps)]
 
 // Basic Scheme expressions, using [] now to aviod K's parsing issue
   syntax Exp ::= Int | Bool | String | Name
                | "[" Name Exps "]"                 [strict(2)]
+               | "[" "if" Exp Exp Exps "]"         [strict(1)]
 
-  syntax Exps  ::= List{Exp," "}                   [strict]
+  syntax Exps  ::= List{Exp," "}                   [strict, klabel(exps)]
   syntax Val
-  syntax Vals ::= List{Val," "}
+  syntax Vals ::= List{Val," "}                    [klabel(exps)]
   syntax Bottom
-  syntax Bottoms ::= List{Bottom," "}
+  syntax Bottoms ::= List{Bottom," "}              [klabel(exps)]
 
 // Define program to be a sequence of expressions followed by eof
   syntax Pgm ::= Exp Pgm            [strict(1)] 
@@ -74,7 +75,7 @@ module SCHEME
 
 //*@ \subsection{Values and results} */  
 
-  syntax Val ::= Int | Bool | String
+  syntax Val ::= Int | Bool | String | Null
   syntax Exp ::= Val
   syntax Exps ::= Vals
   syntax Vals ::= Bottoms
@@ -82,12 +83,16 @@ module SCHEME
   syntax Names ::= Bottoms
   syntax KResult ::= Vals | Val
 
+  syntax Null ::= null()
+
 /*@ To make sure that the program executes sequentially and KResult
 displays the result of last function executed. */
 
   rule _:Val P:Pgm => P
     when notBool(P ==K eof)
   rule V:Val eof => V
+    when notBool(V ==K null())
+  rule N:Null eof => .
 
 //@ \subsection{Arithmetic expressions}
 
@@ -118,12 +123,18 @@ displays the result of last function executed. */
     when V1 ==K V2                                          [arith]
   rule [eqv? _:Val _:Val] => false                          [arith]
 
+  //@ \subsection{Conditional}
+  
+  rule [if C E:Exp] => [if C E null()]                      [macro]
+  rule [if true E:Exp _:Exp] => E
+  rule [if false _:Exp E:Exp] => E
+
   //@ \subsection{I/O}
 
-  rule <k> [newline .Exps] => "\n" ...</k>
+  rule <k> [newline .Exps] => null() ...</k>
        <output>... .List => ListItem("\n") </output>        [io]
 
-  rule <k> [display V:Val] => V ...</k>
+  rule <k> [display V:Val] => null() ...</k>
        <output>... .List => ListItem(V) </output>           [io]
 
   rule <k> [read .Exps] => I ...</k>
