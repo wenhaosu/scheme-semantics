@@ -1,1 +1,1 @@
-(display (call-with-values * -))
+[display [call-with-values * -]]

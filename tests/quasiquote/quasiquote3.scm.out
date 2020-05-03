@@ -1,1 +1,1 @@
-(a (quasiquote (b (unquote x) (unquote (quote y)) d)) e)
+[a [quasiquote [b [unquote x] [unquote [quote y]] d]] e]
