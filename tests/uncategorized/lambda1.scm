@@ -7,3 +7,4 @@
 [display [f]]
 [define x 0]
 [display [f]]
+eof

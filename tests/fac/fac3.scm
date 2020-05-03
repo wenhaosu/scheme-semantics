@@ -13,3 +13,4 @@
   [newline]
 [display [fac 100]]
   [newline]
+eof

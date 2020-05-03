@@ -5,3 +5,4 @@
 [define x [cons + '[y . [y . [y . []]]]]]
 [display e]
 [display [eval x e]]
+eof

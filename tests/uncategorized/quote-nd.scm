@@ -10,4 +10,4 @@
 
 ;;; SEARCH keyword tells Maude to search for multiple outputs do to 
 ;;; non-determinism
-SEARCH
+SEARCHeof

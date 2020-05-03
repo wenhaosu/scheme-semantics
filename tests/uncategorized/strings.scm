@@ -5,3 +5,4 @@
 [display y]
 [display x]
 [display [string-ref y 1]]               
+eof

@@ -10,3 +10,4 @@
   [newline]
 [display [fib 8]]
   [newline]
+eof

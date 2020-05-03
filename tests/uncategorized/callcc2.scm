@@ -8,3 +8,4 @@
 [n 4]
 [display [foo 4]]
 [n 4]
+eof

@@ -8,3 +8,4 @@
 [display [eval [vector-ref x 1] [k-scheme-environment]]]
 [display [make-vector 5]]
 [display [make-string 5]]
+eof

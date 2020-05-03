@@ -5,4 +5,4 @@
 
 ;;; The keyword SEARCH [always at the end of a program] tells maude to use search rather 
 ;;; than rewrite, for when multiple answers due to non-determinism are desired
-SEARCH
+SEARCHeof

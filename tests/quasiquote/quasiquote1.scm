@@ -8,3 +8,4 @@
   [newline]
 [display x]
   [newline]
+eof

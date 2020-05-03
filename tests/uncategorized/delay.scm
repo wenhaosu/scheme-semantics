@@ -2,4 +2,4 @@
 [define f [delay [begin [set! x [+ x 1]] x]]]
 [display [+ [force f] [force f]]]
 [display [force f]]
-[display f]
+[display f]eof

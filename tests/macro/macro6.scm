@@ -7,3 +7,4 @@
     [newline]
   [display [* a b]]
     [newline]]
+eof

@@ -10,3 +10,4 @@
   [newline]
 [display [foo x]]
   [newline]
+eof

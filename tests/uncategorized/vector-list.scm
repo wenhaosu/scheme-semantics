@@ -10,3 +10,4 @@
     [aux v '[] [- [vector-length v] 1]]
 ]
 [display [vector->list '#[1 2 3]]]
+eof

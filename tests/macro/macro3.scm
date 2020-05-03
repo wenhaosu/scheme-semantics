@@ -9,3 +9,4 @@
   [newline]
 [display [+ [p-or-m plus 1 2 3 4] [p-or-m times 1 2 3 4]]]
   [newline]
+eof
