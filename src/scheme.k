@@ -21,13 +21,17 @@ module SCHEME-COMMON
 // Basic Scheme expressions, using [] now to aviod K's parsing issue
   syntax Exp ::= Int | Bool | String | Name
                | "[" Name Exps "]"                 [strict(2)]
-               | "[" "if" Exp Exp Exps "]"         [strict(1)]
+               | "[" "if" Exp Exp "]"              [strict(1)]
+               | "[" "if" Exp Exp Exp "]"          [strict(1)]
+               | "[" "let" "[" Assigns "]" Exp "]"
 
   syntax Exps  ::= List{Exp," "}                   [strict, klabel(exps)]
   syntax Val
   syntax Vals ::= List{Val," "}                    [klabel(exps)]
   syntax Bottom
   syntax Bottoms ::= List{Bottom," "}              [klabel(exps)]
+  syntax Assign ::= "[" Name Exp "]"               [strict(2)]
+  syntax Assigns ::= List{Assign," "}              [klabel(exps)]
 
 // Define program to be a sequence of expressions followed by eof
   syntax Pgm ::= Exp Pgm            [strict(1)] 
@@ -68,6 +72,7 @@ module SCHEME
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
                   <env color="violet"> .Map </env>
+                  <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <input color="magenta" stream="stdin"> .List </input>
                   <output color="brown" stream="stdout"> .List </output>
@@ -139,5 +144,25 @@ displays the result of last function executed. */
 
   rule <k> [read .Exps] => I ...</k>
        <input> ListItem(I:Int) => .List ... </input>        [io]
+
+  //@ \subsection{Assignment}
+
+  rule <k> [let [As:Assigns] E] => bindTo(As) ~> E ~> setEnv(Rho) ...</k>
+       <env> Rho </env>
+
+  syntax KItem ::= bindTo(Assigns)
+                 | setEnv(Map)
+
+  rule <k> bindTo([X:Name V:Val] As:Assigns) => bindTo(As) ...</k>
+       <env> Rho => Rho[X <- !L:Int] </env>
+       <store>... .Map => !L |-> V ...</store>              [assignment]
+  rule bindTo(.Assigns) => .
+
+  rule <k> V:Val ~> setEnv(Rho) => V ...</k>
+       <env> _ => Rho </env>
+
+  rule <k> X:Name => V ...</k>
+       <env>... X |-> L ...</env>
+       <store>... L |-> V:Val ...</store>                   [lookup]
 
 endmodule
