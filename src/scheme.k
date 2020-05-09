@@ -12,22 +12,20 @@ module SCHEME-COMMON
 
 // Builtin function names, maybe consider replacing with arith later
 
-  syntax Fun ::= "+" | "-" | "*" | "/" | Name
+  syntax Name ::= "+" | "-" | "*" | "/"
                 | ">" | "<" | ">=" | "<=" | "not"
                 | "display" | "newline" | "read"
                 | "eqv?" | "boolean?" | "integer?" | "string?"
-                | "[" "lambda" "[" Names "]"  Exps "]"
-
-  syntax Name
   syntax Names ::= List{Name," "}                  [klabel(exps)]
 
 // Basic Scheme expressions, using [] now to aviod K's parsing issue
   syntax Exp ::= Int | Bool | String | Name
-               | "[" Fun Exps "]"                  [strict(2)]
+               | "[" Exp Exps "]"                  [strict]
                | "[" "if" Exp Exp "]"              [strict(1)]
                | "[" "if" Exp Exp Exp "]"          [strict(1)]
                | "[" "let" "[" Assigns "]" Exp "]"
                | "[" "begin" Exp Exps "]"          [strict(1)]
+               | "[" "lambda" "[" Names "]"  Exps "]"
 
   syntax Exps  ::= List{Exp," "}                   [strict, klabel(exps)]
   syntax Val
@@ -84,6 +82,7 @@ module SCHEME
                   <output color="brown" stream="stdout"> .List </output>
                 </T>
 
+
 //*@ \subsection{Values and results} */  
 
   syntax Val ::= Int | Bool | String | Null
@@ -92,6 +91,7 @@ module SCHEME
   syntax Vals ::= Bottoms
   syntax Exps ::= Names
   syntax Names ::= Bottoms
+  syntax Assigns ::= Bottoms
   syntax KResult ::= Vals | Val
 
   syntax Null ::= null()
@@ -104,6 +104,8 @@ displays the result of last function executed. */
   rule V:Val eof => V
     when notBool(V ==K null())
   rule N:Null eof => .
+  rule V:Val .Vals => V
+
 
 //@ \subsection{Arithmetic expressions}
 
@@ -116,6 +118,7 @@ displays the result of last function executed. */
   rule [/ I1 I2 Vals] => [/ (I1 /Int I2) Vals]
     when I2 =/=K 0                                          [arith]
   rule [/ I .Vals] => I                                     [arith]
+
 
 //@ \subsection{Boolean expressions}
   rule [> I1 I2] => I1 >Int I2                              [arith]
@@ -134,11 +137,13 @@ displays the result of last function executed. */
     when V1 ==K V2                                          [arith]
   rule [eqv? _:Val _:Val] => false                          [arith]
 
+
   //@ \subsection{Conditional}
   
   rule [if C E:Exp] => [if C E null()]                         [macro]
   rule [if true E:Exp _:Exp] => E
   rule [if false _:Exp E:Exp] => E
+
 
   //@ \subsection{I/O}
 
@@ -151,12 +156,39 @@ displays the result of last function executed. */
   rule <k> [read .Exps] => I ...</k>
        <input> ListItem(I:Int) => .List ... </input>        [io]
 
+
   //@ \subsection{Assignment}
 
   rule <k> [let [As:Assigns] E] => bindTo(As) ~> E ~> setEnv(Rho) ...</k>
        <env> Rho </env>
 
+  rule <k> X:Name => V ...</k>
+       <env>... X |-> L ...</env>
+       <store>... L |-> V:Val ...</store>                   [lookup]
+
+
+  //@ \subsection{Begin}
+
+  rule [begin V:Val .Exps] => V
+  rule [begin V:Val E:Exp Es] => [begin E Es]
+  
+
+  //@ \subsection{Function}
+  syntax Val ::= closure(Map,Names,Exps)
+
+  rule <k> [lambda [ Ns:Names ] E:Exps] => closure(Rho, Ns, E) ...</k>
+       <env> Rho </env>
+    [structural]
+
+  rule <k> [closure(Rho, Ns, E) Vs:Vals] => bindMap(Ns, Vs) ~> E ~> setEnv(Rho') ...</k>
+       <env> Rho' </env>
+
+
+
+  //@ \subsection{Extra KItems}
+
   syntax KItem ::= bindTo(Assigns)
+                 | bindMap(Names, Vals)
                  | setEnv(Map)
 
   rule <k> bindTo([X:Name V:Val] As:Assigns) => bindTo(As) ...</k>
@@ -164,19 +196,11 @@ displays the result of last function executed. */
        <store>... .Map => !L |-> V ...</store>              [assignment]
   rule bindTo(.Assigns) => .
 
+  rule bindMap(X:Name Ns, V:Val Vs) => bindTo([X V]) ~> bindMap(Ns, Vs)
+  rule bindMap(.Names, .Vals) => .
+
   rule <k> V:Val ~> setEnv(Rho) => V ...</k>
        <env> _ => Rho </env>
 
-  rule <k> X:Name => V ...</k>
-       <env>... X |-> L ...</env>
-       <store>... L |-> V:Val ...</store>                   [lookup]
-
-  //@ \subsection{Begin}
-
-  rule [begin V:Val .Exps] => V
-  rule [begin V:Val E:Exp Es] => [begin E Es]
-  
-  // //@ \subsection{Function}
-  // syntax Val ::= closure(Map,Names,Exp)
 
 endmodule
