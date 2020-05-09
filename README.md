@@ -5,6 +5,7 @@ This repo is for a dialect of Scheme implemented in K. Some features of our Sche
 
 - Use `[]` instead of `()` for indicating functions
 - Use `eof` as the mark of the end of a function
+- Use `,` instead of `.` to describe pairs and lists
 
 For examples, please refer to `./tests`.
 
