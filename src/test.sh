@@ -2,7 +2,7 @@
 echo "kompile --backend java scheme.k -d ."
 kompile --backend java scheme.k -d .
 
-TestList="io"
+TestList="io cond"
 
 for val in $TestList; do
     echo "Start testing tests/$val..."

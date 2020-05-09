@@ -11,19 +11,23 @@ module SCHEME-COMMON
   imports DOMAINS-SYNTAX
 
 // Builtin function names, maybe consider replacing with arith later
-  syntax Name ::= "+" | "-" | "*" | "/"
+
+  syntax Fun ::= "+" | "-" | "*" | "/" | Name
                 | ">" | "<" | ">=" | "<=" | "not"
                 | "display" | "newline" | "read"
                 | "eqv?" | "boolean?" | "integer?" | "string?"
+                | "[" "lambda" "[" Names "]"  Exps "]"
 
+  syntax Name
   syntax Names ::= List{Name," "}                  [klabel(exps)]
 
 // Basic Scheme expressions, using [] now to aviod K's parsing issue
   syntax Exp ::= Int | Bool | String | Name
-               | "[" Name Exps "]"                 [strict(2)]
+               | "[" Fun Exps "]"                  [strict(2)]
                | "[" "if" Exp Exp "]"              [strict(1)]
                | "[" "if" Exp Exp Exp "]"          [strict(1)]
                | "[" "let" "[" Assigns "]" Exp "]"
+               | "[" "begin" Exp Exps "]"          [strict(1)]
 
   syntax Exps  ::= List{Exp," "}                   [strict, klabel(exps)]
   syntax Val
@@ -34,7 +38,7 @@ module SCHEME-COMMON
   syntax Assigns ::= List{Assign," "}              [klabel(exps)]
 
 // Define program to be a sequence of expressions followed by eof
-  syntax Pgm ::= Exp Pgm            [strict(1)] 
+  syntax Pgm ::= Exp Pgm                           [strict(1)] 
                | "eof"
 
 endmodule
@@ -54,6 +58,8 @@ endmodule
 
 module SCHEME-MACROS
   imports SCHEME-COMMON
+
+  rule [lambda [Ns] E:Exp Es] => [lambda [Ns] [begin E Es]]    [macro]
 
 endmodule
 
@@ -130,7 +136,7 @@ displays the result of last function executed. */
 
   //@ \subsection{Conditional}
   
-  rule [if C E:Exp] => [if C E null()]                      [macro]
+  rule [if C E:Exp] => [if C E null()]                         [macro]
   rule [if true E:Exp _:Exp] => E
   rule [if false _:Exp E:Exp] => E
 
@@ -164,5 +170,13 @@ displays the result of last function executed. */
   rule <k> X:Name => V ...</k>
        <env>... X |-> L ...</env>
        <store>... L |-> V:Val ...</store>                   [lookup]
+
+  //@ \subsection{Begin}
+
+  rule [begin V:Val .Exps] => V
+  rule [begin V:Val E:Exp Es] => [begin E Es]
+  
+  // //@ \subsection{Function}
+  // syntax Val ::= closure(Map,Names,Exp)
 
 endmodule
