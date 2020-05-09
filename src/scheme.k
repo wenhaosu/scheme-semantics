@@ -15,17 +15,20 @@ module SCHEME-COMMON
   syntax Name ::= "+" | "-" | "*" | "/"
                 | ">" | "<" | ">=" | "<=" | "not"
                 | "display" | "newline" | "read"
-                | "eqv?" | "boolean?" | "integer?" | "string?"
+                | "eqv?" | "boolean?" | "integer?" | "string?" | "list?" | "null?"
+                | "car" | "cdr"
   syntax Names ::= List{Name," "}                  [klabel(exps)]
 
 // Basic Scheme expressions, using [] now to aviod K's parsing issue
-  syntax Exp ::= Int | Bool | String | Name
+  syntax Exp ::= Int | Bool | String | Name | Pair
                | "[" Exp Exps "]"                  [strict]
                | "[" "if" Exp Exp "]"              [strict(1)]
                | "[" "if" Exp Exp Exp "]"          [strict(1)]
                | "[" "let" "[" Assigns "]" Exp "]"
                | "[" "begin" Exp Exps "]"          [strict(1)]
                | "[" "lambda" "[" Names "]"  Exps "]"
+               | "[" "list" Exps "]"               [seqstrict]
+               | "[" "cons" Exp Exp "]"            [strict]
 
   syntax Exps  ::= List{Exp," "}                   [strict, klabel(exps)]
   syntax Val
@@ -34,6 +37,8 @@ module SCHEME-COMMON
   syntax Bottoms ::= List{Bottom," "}              [klabel(exps)]
   syntax Assign ::= "[" Name Exp "]"               [strict(2)]
   syntax Assigns ::= List{Assign," "}              [klabel(exps)]
+  syntax Pair ::= "{" Exp "," Exp "}"              [strict]
+                | "{" "}"
 
 // Define program to be a sequence of expressions followed by eof
   syntax Pgm ::= Exp Pgm                           [strict(1)] 
@@ -85,7 +90,7 @@ module SCHEME
 
 //*@ \subsection{Values and results} */  
 
-  syntax Val ::= Int | Bool | String | Null
+  syntax Val ::= Int | Bool | String | Pair | Null
   syntax Exp ::= Val
   syntax Exps ::= Vals
   syntax Vals ::= Bottoms
@@ -136,7 +141,10 @@ displays the result of last function executed. */
   rule [eqv? V1:Val V2:Val] => true
     when V1 ==K V2                                          [arith]
   rule [eqv? _:Val _:Val] => false                          [arith]
-
+  rule [list? { V:Val , _ }] => true                          [arith]
+  rule [list? _] => false                                   [arith]
+//   rule [null? {  }] => true                                   [arith]
+//   rule [null? _] => false                                   [arith]
 
   //@ \subsection{Conditional}
   
@@ -183,6 +191,15 @@ displays the result of last function executed. */
   rule <k> [closure(Rho, Ns, E) Vs:Vals] => bindMap(Ns, Vs) ~> E ~> setEnv(Rho') ...</k>
        <env> Rho' </env>
 
+
+  //@ \subsection{List}
+
+  rule [list .Vals] => { }
+  rule [list V:Val Vs] => [cons V [list Vs] ]
+  rule [cons V1:Val V2:Val] => { V1 , V2 }
+  rule [car {V:Val , _}] => V
+  rule [car {V:Pair , _}] => V
+  rule [cdr {_ , V:Pair}] => V
 
 
   //@ \subsection{Extra KItems}
