@@ -23,7 +23,7 @@ module SCHEME-COMMON
                | "[" Exp Exps "]"                  [strict]
                | "[" "if" Exp Exp "]"              [strict(1)]
                | "[" "if" Exp Exp Exp "]"          [strict(1)]
-               | "[" "let" "[" Assigns "]" Exp "]"
+               | "[" "let" "[" Exps "]" Exp "]"
                | "[" "begin" Exp Exps "]"          [strict(1)]
                | "[" "lambda" "[" Names "]"  Exps "]"
 
@@ -32,8 +32,6 @@ module SCHEME-COMMON
   syntax Vals ::= List{Val," "}                    [klabel(exps)]
   syntax Bottom
   syntax Bottoms ::= List{Bottom," "}              [klabel(exps)]
-  syntax Assign ::= "[" Name Exp "]"               [strict(2)]
-  syntax Assigns ::= List{Assign," "}              [klabel(exps)]
 
 // Define program to be a sequence of expressions followed by eof
   syntax Pgm ::= Exp Pgm                           [strict(1)] 
@@ -91,7 +89,6 @@ module SCHEME
   syntax Vals ::= Bottoms
   syntax Exps ::= Names
   syntax Names ::= Bottoms
-  syntax Assigns ::= Bottoms
   syntax KResult ::= Vals | Val
 
   syntax Null ::= null()
@@ -104,7 +101,7 @@ displays the result of last function executed. */
   rule V:Val eof => V
     when notBool(V ==K null())
   rule N:Null eof => .
-  rule V:Val .Vals => V
+  // rule V:Val .Vals => V
 
 
 //@ \subsection{Arithmetic expressions}
@@ -159,7 +156,7 @@ displays the result of last function executed. */
 
   //@ \subsection{Assignment}
 
-  rule <k> [let [As:Assigns] E] => bindTo(As) ~> E ~> setEnv(Rho) ...</k>
+  rule <k> [let [As:Exps] E] => bindTo(As) ~> E ~> setEnv(Rho) ...</k>
        <env> Rho </env>
 
   rule <k> X:Name => V ...</k>
@@ -187,14 +184,14 @@ displays the result of last function executed. */
 
   //@ \subsection{Extra KItems}
 
-  syntax KItem ::= bindTo(Assigns)
+  syntax KItem ::= bindTo(Exps)
                  | bindMap(Names, Vals)
                  | setEnv(Map)
 
-  rule <k> bindTo([X:Name V:Val] As:Assigns) => bindTo(As) ...</k>
+  rule <k> bindTo([X:Name V:Val] As:Exps) => bindTo(As) ...</k>
        <env> Rho => Rho[X <- !L:Int] </env>
        <store>... .Map => !L |-> V ...</store>              [assignment]
-  rule bindTo(.Assigns) => .
+  rule bindTo(.Exps) => .
 
   rule bindMap(X:Name Ns, V:Val Vs) => bindTo([X V]) ~> bindMap(Ns, Vs)
   rule bindMap(.Names, .Vals) => .
