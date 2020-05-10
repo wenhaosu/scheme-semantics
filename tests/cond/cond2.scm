@@ -1,2 +1,2 @@
-[if [> 1 [+ 2 3]] [display "true"]]
+[if [> 1 [+ 2 3]] "true"]
 eof

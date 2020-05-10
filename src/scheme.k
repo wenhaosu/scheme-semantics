@@ -14,9 +14,8 @@ module SCHEME-COMMON
 
   syntax Name ::= "+" | "-" | "*" | "/"
                 | ">" | "<" | ">=" | "<=" | "not"
-                | "display" | "newline" | "read"
+                | "newline" | "read"
                 | "eqv?" | "boolean?" | "integer?" | "string?" | "list?" | "null?"
-                | "car" | "cdr"
   syntax Names ::= List{Name," "}                  [klabel(exps)]
 
 // Basic Scheme expressions, using [] now to aviod K's parsing issue
@@ -29,6 +28,9 @@ module SCHEME-COMMON
                | "[" "lambda" "[" Names "]"  Exps "]"
                | "[" "list" Exps "]"               [seqstrict]
                | "[" "cons" Exp Exp "]"            [strict]
+               | "[" "car" Exp "]"                 [strict]
+               | "[" "cdr" Exp "]"                 [strict]
+               | "[" "display" Exp "]"             [strict]
 
   syntax Exps  ::= List{Exp," "}                   [strict, klabel(exps)]
   syntax Val
