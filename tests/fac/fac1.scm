@@ -1,12 +1,9 @@
 //factorial with do loop
 [define fac
-    [lambda [n]
-        [do [[i n [- i 1]] [a 1 [* a i]]]
-            [[= 0 i] a]]]]
-[display [fac 3]]
-  [newline]
-[display [fac 10]]
-  [newline]
-[display [fac 100]]
-  [newline]
+    [lambda [x]
+        [if [eqv? x 0] 
+            1
+            [* x [fac [- x 1]]]]]]
+[define input 8]
+[fac 8]
 eof
