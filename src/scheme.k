@@ -140,14 +140,14 @@ displays the result of last function executed. */
   rule [eqv? V1:Val V2:Val] => true
     when V1 ==K V2                                          [arith]
   rule [eqv? _:Val _:Val] => false                          [arith]
-  rule [list? { V:Val , _ }] => true                          [arith]
+  rule [list? { V:Val , _ }] => true                        [arith]
   rule [list? _] => false                                   [arith]
 //   rule [null? {  }] => true                                   [arith]
 //   rule [null? _] => false                                   [arith]
 
   //@ \subsection{Conditional}
   
-  rule [if C E:Exp] => [if C E null()]                         [macro]
+  rule [if C:Val E:Exp] => [if C E null()]
   rule [if true E:Exp _:Exp] => E
   rule [if false _:Exp E:Exp] => E
 
