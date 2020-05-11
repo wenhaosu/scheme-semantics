@@ -12,7 +12,7 @@ module SCHEME-COMMON
 
 // Builtin function names, maybe consider replacing with arith later
 
-  syntax Name ::= "+" | "-" | "*" | "/"
+  syntax Name ::= "+" | "-" | "*" | "/" | "="
                 | ">" | "<" | ">=" | "<=" | "not"
                 | "newline" | "read"
                 | "eqv?" | "boolean?" | "integer?" | "string?" | "list?" | "null?"
@@ -24,13 +24,19 @@ module SCHEME-COMMON
                | "[" "if" Exp Exp "]"              [strict(1)]
                | "[" "if" Exp Exp Exp "]"          [strict(1)]
                | "[" "let" "[" Exps "]" Exp "]"
+               | "[" "let" Name "[" Exps "]" Exp "]"
                | "[" "begin" Exp Exps "]"          [strict(1)]
-               | "[" "lambda" "[" Names "]"  Exps "]"
+               | "[" "lambda" "[" Names "]"  Exp "]"
                | "[" "list" Exps "]"               [seqstrict]
                | "[" "cons" Exp Exp "]"            [strict]
                | "[" "car" Exp "]"                 [strict]
                | "[" "cdr" Exp "]"                 [strict]
                | "[" "display" Exp "]"             [strict]
+
+  // "define" can only appear at the top level of a program
+  syntax Top ::= "[" "define" Name Exp "]"         [strict(2)]
+               | "[" "define" "[" Name Names "]" Exp "]"
+               | Exp
 
   syntax Exps  ::= List{Exp," "}                   [strict, klabel(exps)]
   syntax Val
@@ -41,7 +47,7 @@ module SCHEME-COMMON
                 | "{" "}"
 
 // Define program to be a sequence of expressions followed by eof
-  syntax Pgm ::= Exp Pgm                           [strict(1)] 
+  syntax Pgm ::= Top Pgm                           [strict(1)]
                | "eof"
 
 endmodule
@@ -62,7 +68,7 @@ endmodule
 module SCHEME-MACROS
   imports SCHEME-COMMON
 
-  rule [lambda [Ns] E:Exp Es] => [lambda [Ns] [begin E Es]]    [macro]
+  rule [define [N:Name Ns] E:Exp] => [define N [lambda [Ns] E]]    [macro]
 
 endmodule
 
@@ -81,7 +87,6 @@ module SCHEME
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
                   <env color="violet"> .Map </env>
-                  <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <input color="magenta" stream="stdin"> .List </input>
                   <output color="brown" stream="stdout"> .List </output>
@@ -122,6 +127,11 @@ displays the result of last function executed. */
   rule [/ I1 I2 Vals] => [/ (I1 /Int I2) Vals]
     when I2 =/=K 0                                          [arith]
   rule [/ I .Vals] => I                                     [arith]
+  rule [= V1:Val V2:Val Vals] => false
+    when notBool(V1 ==K V2)                                 [arith]
+  rule [= V1:Val V2:Val Vals] => [= V2:Val Vals]
+    when V1 ==K V2                                          [arith]
+  rule [= V .Vals] => true                                  [arith]
 
 
 //@ \subsection{Boolean expressions}
@@ -169,6 +179,14 @@ displays the result of last function executed. */
   rule <k> [let [As:Exps] E] => bindTo(As) ~> E ~> setEnv(Rho) ...</k>
        <env> Rho </env>
 
+  rule <k> [let N:Name [As:Exps] E] => bindFun(N, As, E, Rho, parags(.Names, .Vals)) ~> setEnv(Rho) ...</k>
+       <env> Rho </env>
+
+  rule <k> [define N:Name V:Val] => null() ...</k>
+       <env> Rho => Rho[N <- !L:Int] </env>
+       <store>... .Map => !L |-> V ...</store>
+    [assignment]
+
   rule <k> X:Name => V ...</k>
        <env>... X |-> L ...</env>
        <store>... L |-> V:Val ...</store>                   [lookup]
@@ -181,9 +199,9 @@ displays the result of last function executed. */
   
 
   //@ \subsection{Function}
-  syntax Val ::= closure(Map,Names,Exps)
+  syntax Val ::= closure(Map,Names,Exp)
 
-  rule <k> [lambda [ Ns:Names ] E:Exps] => closure(Rho, Ns, E) ...</k>
+  rule <k> [lambda [ Ns:Names ] E:Exp] => closure(Rho, Ns, E) ...</k>
        <env> Rho </env>
     [structural]
 
@@ -205,15 +223,26 @@ displays the result of last function executed. */
 
   syntax KItem ::= bindTo(Exps)
                  | bindMap(Names, Vals)
+                 | bindFun(Name, Exps, Exp, Map, KItem)
                  | setEnv(Map)
+                 | parags(Names, Vals)
 
   rule <k> bindTo([X:Name V:Val] As:Exps) => bindTo(As) ...</k>
        <env> Rho => Rho[X <- !L:Int] </env>
-       <store>... .Map => !L |-> V ...</store>              [assignment]
+       <store>... .Map => !L |-> V ...</store>
+    [assignment]
   rule bindTo(.Exps) => .
 
   rule bindMap(X:Name Ns, V:Val Vs) => bindTo([X V]) ~> bindMap(Ns, Vs)
   rule bindMap(.Names, .Vals) => .
+
+  rule bindFun(N, [X:Name V:Val] As:Exps, E, Rho, parags(Ns, Vs))
+        => bindFun(N, As, E, Rho, parags(X Ns, V Vs))
+  
+  rule <k> bindFun(N:Name, .Exps, E:Exp, Rho', parags(Ns, Vs)) => [N Vs] ...</k>
+       <env> Rho => Rho[N <- !L:Int] </env>
+       <store>... .Map => !L |-> closure(Rho', Ns, E) ...</store>
+    [assignment]
 
   rule <k> V:Val ~> setEnv(Rho) => V ...</k>
        <env> _ => Rho </env>
