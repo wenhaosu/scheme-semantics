@@ -1,5 +1,5 @@
-[let [[x 5]]
-    [let* [[x 2]
-          [y x]]
-      [list y x]]]
+[let fac [[n 10]]
+    [if [= 0 n]
+        1
+        [* n [fac [- n 1]]]]]
 eof
