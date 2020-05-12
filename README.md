@@ -10,6 +10,7 @@ Some features of our Scheme dialect are:
 - Use `eof` as the mark of the end of a function
 - Use `,` instead of `.` to describe pairs and lists
 - `let` completes the job of both `let` and `letrec` in original Scheme
+- For `define`, `let` and `let*`, only letters are allowed (no special symbols, e.g. `+`, `-`)
 
 Below is a list of the functionalities implemented so far:
 - Arithmetic operations including `+`, `-`, `x`, `÷`
