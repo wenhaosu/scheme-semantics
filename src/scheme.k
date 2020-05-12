@@ -87,6 +87,7 @@ module SCHEME
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
                   <env color="violet"> .Map </env>
+                  <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <input color="magenta" stream="stdin"> .List </input>
                   <output color="brown" stream="stdout"> .List </output>
