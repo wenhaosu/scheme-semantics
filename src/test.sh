@@ -2,7 +2,7 @@
 echo "kompile --backend java scheme.k -d ."
 kompile --backend java scheme.k -d .
 
-TestList="let cond io list fac"
+TestList="define lambda let cond io list fac"
 
 for val in $TestList; do
     if [ $val == "io" ]; then

@@ -29,6 +29,7 @@ Some features of our Scheme dialect are:
 - Use `,` instead of `.` to describe pairs and lists
 - Use `//`, `/*` and `*/` instead of `;`, `#|` and `|#` to comment
 - `let` completes the job of both `let` and `letrec` in original Scheme
+- For `define`, `let` and `let*`, only letters are allowed (no special symbols, e.g. `+`, `-`)
 
 Below is a list of the functionalities implemented so far:
 - Arithmetic expressions: `+`, `-`, `x`, `÷` 
