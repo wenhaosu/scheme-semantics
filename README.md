@@ -11,3 +11,21 @@ For examples, please refer to `./tests`.
 
 ## Contributor
 Wenhao Su, Qihang Ren, Junkai Cheng, Patrick Meredith, Grigore Rosu
+
+## Prerequisite
+K Framework Tools 5.0
+
+Check https://github.com/kframework/k for details
+
+## Compile
+Compile:
+
+```
+kompile --backend java ./src/scheme.k -d 
+```
+
+Run: 
+
+```
+krun filename.scm
+```
