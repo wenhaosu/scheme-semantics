@@ -46,6 +46,9 @@ module SCHEME-COMMON
   syntax Pair ::= "{" Exp "," Exp "}"              [strict]
                 | "{" "}"
 
+// Call-with-current-continuation
+  syntax Exp ::= "call/cc"
+
 // Define program to be a sequence of expressions followed by eof
   syntax Pgm ::= Top Pgm                           [strict(1)]
                | "eof"
@@ -218,6 +221,14 @@ displays the result of last function executed. */
   rule [car {V:Val , _}] => V
   rule [car {V:Pair , _}] => V
   rule [cdr {_ , V:Pair}] => V
+
+  //@ \subsection{call/cc}
+
+  syntax Val ::= cc(Map,K)
+  rule <k> ([call/cc V:Val] => [V cc(Rho,K)]) ~> K </k>  
+       <env> Rho </env>
+  rule <k> [cc(Rho,K) V:Val] ~> _ => V ~> K </k>  
+       <env> _ => Rho </env>
 
 
   //@ \subsection{Extra KItems}
