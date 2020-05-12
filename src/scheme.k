@@ -24,6 +24,7 @@ module SCHEME-COMMON
                | "[" "if" Exp Exp "]"              [strict(1)]
                | "[" "if" Exp Exp Exp "]"          [strict(1)]
                | "[" "let" "[" Exps "]" Exp "]"
+               | "[" "let*" "[" Exps "]" Exp "]"
                | "[" "let" Name "[" Exps "]" Exp "]"
                | "[" "begin" Exp Exps "]"          [strict(1)]
                | "[" "lambda" "[" Names "]"  Exp "]"
@@ -177,7 +178,10 @@ displays the result of last function executed. */
 
   //@ \subsection{Assignment}
 
-  rule <k> [let [As:Exps] E] => bindTo(As) ~> E ~> setEnv(Rho) ...</k>
+  rule <k> [let* [As:Exps] E] => bindTo(As) ~> E ~> setEnv(Rho) ...</k>
+       <env> Rho </env>
+
+  rule <k> [let [As:Exps] E] => bindLet(As, .Map) ~> E ~> setEnv(Rho) ...</k>
        <env> Rho </env>
 
   rule <k> [let N:Name [As:Exps] E] => bindFun(N, As, E, Rho, parags(.Names, .Vals)) ~> setEnv(Rho) ...</k>
@@ -223,16 +227,32 @@ displays the result of last function executed. */
   //@ \subsection{Extra KItems}
 
   syntax KItem ::= bindTo(Exps)
+                 | bindLet(Exps, Map)
                  | bindMap(Names, Vals)
                  | bindFun(Name, Exps, Exp, Map, KItem)
                  | setEnv(Map)
+                 | mergeEnv(Map)
                  | parags(Names, Vals)
+
+  context bindTo([_:Name HOLE] _:Exps)
+  context bindLet([_:Name HOLE] _:Exps, _)
+  context bindFun(_:Name, [_:Name HOLE] _:Exps, _:Exp, _:Map, _:KItem)
+  
 
   rule <k> bindTo([X:Name V:Val] As:Exps) => bindTo(As) ...</k>
        <env> Rho => Rho[X <- !L:Int] </env>
        <store>... .Map => !L |-> V ...</store>
     [assignment]
   rule bindTo(.Exps) => .
+
+  rule <k> bindLet([X:Name V:Val] As:Exps, Rho) => bindLet(As, Rho[X <- !L:Int]) ...</k>
+       <store>... .Map => !L |-> V ...</store>
+    [assignment]
+  rule bindLet(.Exps, Rho) => mergeEnv(Rho)
+
+  rule <k> mergeEnv((X:Name |-> V:Val => .Map) _:Map) ...</k>
+       <env> Rho => Rho[X <- V] </env>
+  rule mergeEnv(.Map) => .
 
   rule bindMap(X:Name Ns, V:Val Vs) => bindTo([X V]) ~> bindMap(Ns, Vs)
   rule bindMap(.Names, .Vals) => .
