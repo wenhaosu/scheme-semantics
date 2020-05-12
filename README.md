@@ -6,6 +6,7 @@ This repo is for a dialect of Scheme implemented in K. Some features of our Sche
 - Use `[]` instead of `()` for indicating functions
 - Use `eof` as the mark of the end of a function
 - Use `,` instead of `.` to describe pairs and lists
+- Use `//`, `/*` and `*/` instead of `;`, `#|` and `|#` to comment
 
 For examples, please refer to `./tests`.
 
@@ -17,7 +18,7 @@ K Framework Tools 5.0
 
 Check https://github.com/kframework/k for details
 
-## Compile
+## How to Use
 Compile:
 
 ```
@@ -29,3 +30,14 @@ Run:
 ```
 krun filename.scm
 ```
+## Function
+We implemented part of scheme functions. They are:
+
+- Arithmetic expressions
+- Boolean expressions
+- Conditional expressions
+- File I/O
+- Local Binding: `let`, `let*`, and `letrec`
+- Procedure Expressions: `lambda`
+- Pair and List
+- Continuation: `call/cc` 
