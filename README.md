@@ -34,7 +34,7 @@ Below is a list of the functionalities implemented so far:
 - Arithmetic expressions: `+`, `-`, `x`, `÷` 
 - Boolean expressions
 - Conditional expressions
-- Valuable assignment: `define`
+- Valuable assignment: `define`, `set!`
 - File I/O: `read`, `display`
 - Local Binding: `let`, `let*`
 - Procedure Expressions: `lambda`
