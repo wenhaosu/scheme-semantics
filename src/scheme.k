@@ -39,6 +39,8 @@ module SCHEME-COMMON
                | "[" "define" "[" Name Names "]" Exp "]"
                | Exp
 
+  syntax Exp ::= "[" "set!" Name Exp "]"         [strict(2)]
+
   syntax Exps  ::= List{Exp," "}                   [strict, klabel(exps)]
   syntax Val
   syntax Vals ::= List{Val," "}                    [klabel(exps)]
@@ -193,6 +195,11 @@ displays the result of last function executed. */
   rule <k> [define N:Name V:Val] => null() ...</k>
        <env> Rho => Rho[N <- !L:Int] </env>
        <store>... .Map => !L |-> V ...</store>
+    [assignment]
+
+  rule <k> [set! N:Name V:Val] => null() ...</k>
+       <env>... N |-> L ...</env>
+       <store>... L |-> _ =>  L |-> V ...</store>
     [assignment]
 
   rule <k> X:Name => V ...</k>
