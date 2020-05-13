@@ -33,11 +33,8 @@ module SCHEME-COMMON
                | "[" "car" Exp "]"                 [strict]
                | "[" "cdr" Exp "]"                 [strict]
                | "[" "display" Exp "]"             [strict]
-
-  // "define" can only appear at the top level of a program
-  syntax Top ::= "[" "define" Name Exp "]"         [strict(2)]
+               | "[" "define" Name Exp "]"         [strict(2)]
                | "[" "define" "[" Name Names "]" Exp "]"
-               | Exp
 
   syntax Exp ::= "[" "set!" Name Exp "]"         [strict(2)]
 
@@ -53,7 +50,7 @@ module SCHEME-COMMON
   syntax Exp ::= "call/cc"
 
 // Define program to be a sequence of expressions followed by eof
-  syntax Pgm ::= Top Pgm                           [strict(1)]
+  syntax Pgm ::= Exp Pgm                           [strict(1)]
                | "eof"
 
 endmodule
@@ -199,7 +196,7 @@ displays the result of last function executed. */
 
   rule <k> [set! N:Name V:Val] => null() ...</k>
        <env>... N |-> L ...</env>
-       <store>... L |-> _ =>  L |-> V ...</store>
+       <store>... L |-> (_ => V) ...</store>
     [assignment]
 
   rule <k> X:Name => V ...</k>
