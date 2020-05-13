@@ -27,6 +27,7 @@ Some features of our Scheme dialect are:
 - Use `[]` instead of `()` for indicating functions
 - Use `eof` as the mark of the end of a function
 - Use `,` instead of `.` to describe pairs and lists
+- Use `{}` instead of `()` to hold pair and list items
 - Use `//`, `/*` and `*/` instead of `;`, `#|` and `|#` to comment
 - `let` completes the job of both `let` and `letrec` in original Scheme
 - For `define`, `let` and `let*`, only letters are allowed (no special symbols, e.g. `+`, `-`)
@@ -36,6 +37,7 @@ Below is a list of the functionalities implemented so far:
 - Boolean expressions
 - Conditional expressions
 - Valuable assignment: `define`, `set!`
+- Lambda function: `lambda`
 - File I/O: `read`, `display`
 - Local Binding: `let`, `let*`
 - Procedure Expressions: `lambda`
